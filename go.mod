@@ -1,4 +1,4 @@
-module github.com/edte/jce-codec
+module github.com/erpc-go/jce-codec
 
 go 1.19
 
