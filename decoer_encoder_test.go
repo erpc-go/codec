@@ -31,6 +31,33 @@ func TestHead(t *testing.T) {
 	}
 }
 
+func TestLength(t *testing.T) {
+	d := func(a uint32) {
+		data := bytes.NewBuffer(make([]byte, 0))
+
+		b := NewEncoder(data)
+		b.WriteLength(a)
+		if err := b.Flush(); err != nil {
+			t.Error(err)
+		}
+
+		d := NewDecoder(data)
+		ty, err := d.ReadLength()
+		if err != nil {
+			t.Error(err)
+		}
+
+		if ty != a {
+			t.Error(err)
+		}
+	}
+
+	lens := []uint32{1, 234234, 2, 127, 128, 999, 55, 0, 99999999}
+	for _, v := range lens {
+		d(v)
+	}
+}
+
 func TestInt8(t *testing.T) {
 	data := bytes.NewBuffer(make([]byte, 0))
 	var tmp int8
@@ -466,10 +493,6 @@ func TestSliceInt8(t *testing.T) {
 	if !reflect.DeepEqual(want, got) {
 		t.Errorf("Test Write_slice_int8 failed. want:%v, got:%v\n", want, got)
 	}
-}
-
-func TestLength(t *testing.T) {
-
 }
 
 // BenchmarkUint32 benchmarks the write and read the uint32 type.

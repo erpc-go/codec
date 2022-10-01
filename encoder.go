@@ -237,7 +237,6 @@ func (e *Encoder) WriteBool(data bool, tag byte) (err error) {
 	return e.WriteInt8(tmp, tag)
 }
 
-// TODO: 这里看是不是增加一种情况，只写 data 就行，而不用写什么 tag
 // 主要是 vector<string> 这种情况，写内部 string 时，也每次都写了个 tag，都默认是 0，感觉不太好，这个是无效信息
 // 序列化 string
 // 方案如下：
@@ -246,32 +245,17 @@ func (e *Encoder) WriteBool(data bool, tag byte) (err error) {
 // |---------------------------------------|
 // 注意点在于根据长度选择 length 字段的字节数，这个主要是进行了优化
 func (e *Encoder) WriteString(data string, tag byte) (err error) {
-	// [step 1] 写头部，根据 string 长度来决定长度字段的字节数
-	if len(data) <= 255 {
-		// [step 1.1.1] 长度 <=255,用 string1 类型，长度用 1B 表示
-		// 写 type、tag
-		if err = e.WriteHead(STRING1, tag); err != nil {
-			return err
-		}
-
-		// [step 1.1.2] 写长度 (1B)
-		if err = e.writeByte(uint8(len(data))); err != nil {
-			return err
-		}
-	} else {
-		// [step 1.2.1] 如果长度大于 255，即长度不能用 1Byte 来表示，则使用 string4 类型，长度用 4Byte 来表示
-		// 写 type、tag
-		if err = e.WriteHead(STRING4, tag); err != nil {
-			return err
-		}
-
-		// [step 1.2.1] 写长度 (4B)
-		if err = e.writeByte4(uint32(len(data))); err != nil {
-			return err
-		}
+	// [step 1] 写头部
+	if err = e.WriteHead(String, tag); err != nil {
+		return
 	}
 
-	// [step 2] 写数据
+	// [step 2] 写长度
+	if err = e.WriteLength(uint32(len(data))); err != nil {
+		return
+	}
+
+	// [step 3] 写数据
 	return e.writeString(data)
 }
 
@@ -311,6 +295,15 @@ func (e *Encoder) WriteSliceInt8(data []int8, tag byte) (err error) {
 // TODO: 这里看能不能优化一下长度字段？看怎么重新设计一下，把 list、map、string 等都优化在一起
 // 现在默认直接用 4B 来表示长度
 func (e *Encoder) WriteLength(length uint32) (err error) {
+	// [step 1] 如果可以用 1B 表示，则最高位置 0（默认就是）
+	if length <= 127 {
+		return e.writeByte(uint8(length))
+	}
+
+	// [step 2] 后者最高位置 1
+	length |= 0x80000000
+
+	// [step 3] 然后写
 	return e.writeByte4(length)
 }
 

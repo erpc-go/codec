@@ -31,8 +31,7 @@ const (
 	FLOAT4
 	FLOAT8
 	ZeroTag
-	STRING1
-	STRING4
+	String
 	MAP
 	SimpleList
 	LIST

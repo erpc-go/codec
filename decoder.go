@@ -373,46 +373,28 @@ func (d *Decoder) ReadString(data *string, tag byte, require bool) (err error) {
 	}
 
 	if !have { // tag 不存在,但是不要求必须存在
-		return nil
+		return
 	}
 
-	// [step 2] 读数据
-	switch t {
-	case STRING1: // 1B
-		var length uint8
-		var buff []byte
-
-		// [step 2.1.1] 读长度
-		if length, err = d.readByte(); err != nil {
-			return fmt.Errorf("read string1' length failed, tag,:%d error:%v", tag, err)
-		}
-
-		// [step 2.1.2] 读具体数据
-		if buff, err = d.readByteN(int(length)); err != nil {
-			return fmt.Errorf("read string1' data failed, tag,:%d error:%v", tag, err)
-		}
-
-		*data = string(buff)
-		return
-	case STRING4: // 4B
-		var length uint32
-		var buff []byte
-
-		// [step 2.2.1] 读长度
-		if length, err = d.readByte4(); err != nil {
-			return fmt.Errorf("read string4' length failed, tag,:%d error:%v", tag, err)
-		}
-
-		// [step 2.2.2] 读具体数据
-		if buff, err = d.readByteN(int(length)); err != nil {
-			return fmt.Errorf("read string4' data failed, tag,:%d error:%v", tag, err)
-		}
-
-		*data = string(buff)
-		return
-	default:
-		return fmt.Errorf("need string, tag:%d, but type is %s", tag, t)
+	if t != String {
+		return fmt.Errorf("want type %s, but got %s", String, JceEncodeType(t))
 	}
+
+	// [step 2] 读长度
+	length, err := d.ReadLength()
+	if err != nil {
+		return fmt.Errorf("read string length failed, tag:%d, err:%s", tag, err)
+	}
+
+	var buff []byte
+
+	// [step 3] 读具体数据
+	if buff, err = d.readByteN(int(length)); err != nil {
+		return fmt.Errorf("read string1' data failed, tag,:%d error:%v", tag, err)
+	}
+
+	*data = string(buff)
+	return
 }
 
 // TODO: 这里看是不是要优化一下？把代码生成的逻辑放到基础部分里来
@@ -468,7 +450,27 @@ func (d *Decoder) ReadSliceInt8(data *[]int8, tag byte, require bool) (err error
 
 // 反序列化一个长度字段
 func (d *Decoder) ReadLength() (length uint32, err error) {
-	return d.readByte4()
+	// [step 1] 先 peek 一个字节
+	t, err := d.buf.Peek(1)
+	if err != nil {
+		return
+	}
+	// [step 2] 如果这个字节最高位为 0，则说明长度为 1B
+	if t[0] <= 127 {
+		data, err := d.readByte()
+		return uint32(data), err
+	}
+
+	// [step 3] 后者说明长度为 4B
+	length, err = d.readByte4()
+	if err != nil {
+		return
+	}
+
+	// [step 4] 高位恢复
+	length &= 0x7fffffff
+
+	return
 }
 
 func (d *Decoder) ReadByte() (b byte, err error) {
@@ -634,10 +636,8 @@ func (d *Decoder) skipField(ty JceEncodeType) (err error) {
 		return d.skip(4)
 	case FLOAT8:
 		return d.skip(8)
-	case STRING1:
-		return d.skipFieldString1()
-	case STRING4:
-		return d.skipFieldString4()
+	case String:
+		return d.skipFieldString()
 	case MAP:
 		return d.skipFieldMap()
 	case LIST:
@@ -663,30 +663,17 @@ func (d *Decoder) skip(n int) (err error) {
 	return
 }
 
-// 跳过 string1 个字节
+// 跳过 string 个字节
 //
 //go:nosplit
-func (d *Decoder) skipFieldString1() (err error) {
-	// [step 1] 读 1 字节表示长度
-	data, err := d.readByte()
+func (d *Decoder) skipFieldString() (err error) {
+	// [step 1] 读长度
+	length, err := d.ReadLength()
 	if err != nil {
-		return err
+		return
 	}
 	// [step 2] 跳
-	return d.skip(int(data))
-}
-
-// 跳过 string4 个字节
-//
-//go:nosplit
-func (d *Decoder) skipFieldString4() (err error) {
-	// [step 1] 读 4 字节表示长度
-	l, err := d.readByte4()
-	if err != nil {
-		return err
-	}
-	// [step 2] 跳
-	return d.skip(int(l))
+	return d.skip(int(length))
 }
 
 // 跳过 map 数据部分字节
@@ -694,7 +681,7 @@ func (d *Decoder) skipFieldString4() (err error) {
 //go:nosplit
 func (d *Decoder) skipFieldMap() (err error) {
 	// [step 1] 读 item 的 长度
-	length, err := d.readByte4()
+	length, err := d.ReadLength()
 	if err != nil {
 		return err
 	}
@@ -724,7 +711,7 @@ func (d *Decoder) skipFieldMap() (err error) {
 //go:nosplit
 func (d *Decoder) skipFieldList() (err error) {
 	// [step 1] 读长度
-	length, err := d.readByte4()
+	length, err := d.ReadLength()
 	if err != nil {
 		return err
 	}
@@ -749,7 +736,13 @@ func (d *Decoder) skipFieldList() (err error) {
 //
 //go:nosplit
 func (d *Decoder) skipFieldSimpleList() error {
-	// [step 1] 读 item type
+	// [step 1] 读数据长度
+	length, err := d.ReadLength()
+	if err != nil {
+		return err
+	}
+
+	// [step 2] 读 item type
 	t, err := d.readByte()
 	if err != nil {
 		return err
@@ -757,12 +750,6 @@ func (d *Decoder) skipFieldSimpleList() error {
 
 	if JceEncodeType(t) != INT1 {
 		return fmt.Errorf("simple list need byte head. but get %d", t)
-	}
-
-	// [step 2] 读数据长度
-	length, err := d.readByte4()
-	if err != nil {
-		return err
 	}
 
 	// [step 3] 跳数据
