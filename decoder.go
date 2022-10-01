@@ -9,8 +9,6 @@ import (
 	"unsafe"
 )
 
-// TODO: 考虑用 io.ReadFULL() 优化？同步读取
-
 // TODO: 考虑优化长度字段？string 和 list、map 等的长度字段怎么优化？单独写一个 readLength()、writeLength()
 // 还是像现有 string 一样拆分 type？
 
