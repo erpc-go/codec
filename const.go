@@ -24,35 +24,35 @@ func (j JceEncodeType) String() string {
 
 // jce type
 const (
-	BYTE JceEncodeType = iota
-	SHORT
-	INT
-	LONG
-	FLOAT
-	DOUBLE
+	INT1 JceEncodeType = iota
+	INT2
+	INT4
+	INT8
+	FLOAT4
+	FLOAT8
+	ZeroTag
 	STRING1
 	STRING4
 	MAP
+	SimpleList
 	LIST
 	StructBegin
 	StructEnd
-	ZeroTag
-	SimpleList
 )
 
 var typeToStr = []string{
-	"Byte",
-	"Short",
-	"Int",
-	"Long",
-	"Float",
-	"Double",
+	"Int1",
+	"Int2",
+	"Int4",
+	"Int8",
+	"Float4",
+	"Float8",
+	"ZeroTag",
 	"String1",
 	"String4",
 	"Map",
+	"SimpleList",
 	"List",
 	"StructBegin",
 	"StructEnd",
-	"ZeroTag",
-	"SimpleList",
 }

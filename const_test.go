@@ -13,7 +13,7 @@ func TestJceEncodeType_String(t *testing.T) {
 	}{
 		{
 			name: "",
-			j:    BYTE,
+			j:    INT1,
 			want: "Byte",
 		},
 		{

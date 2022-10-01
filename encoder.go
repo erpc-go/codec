@@ -71,7 +71,7 @@ func (e *Encoder) WriteInt8(data int8, tag byte) (err error) {
 	}
 
 	// [step 2] 如果不为 0，则先写 type、tag
-	if err = e.WriteHead(BYTE, tag); err != nil {
+	if err = e.WriteHead(INT1, tag); err != nil {
 		return
 	}
 
@@ -91,7 +91,7 @@ func (e *Encoder) WriteInt16(data int16, tag byte) (err error) {
 	}
 
 	// [step 2] 否则，先写 type、tag
-	if err = e.WriteHead(SHORT, tag); err != nil {
+	if err = e.WriteHead(INT2, tag); err != nil {
 		return
 	}
 
@@ -111,7 +111,7 @@ func (e *Encoder) WriteInt32(data int32, tag byte) (err error) {
 	}
 
 	// [step 2] 否则先写 type、tag
-	if err = e.WriteHead(INT, tag); err != nil {
+	if err = e.WriteHead(INT4, tag); err != nil {
 		return
 	}
 
@@ -131,7 +131,7 @@ func (e *Encoder) WriteInt64(data int64, tag byte) (err error) {
 	}
 
 	// [step 2] 佛则写 type、tag
-	if err = e.WriteHead(LONG, tag); err != nil {
+	if err = e.WriteHead(INT8, tag); err != nil {
 		return
 	}
 
@@ -187,7 +187,7 @@ func (e *Encoder) WriteFloat32(data float32, tag byte) (err error) {
 	}
 
 	// [step 2] 写 type、tag
-	if err = e.WriteHead(FLOAT, tag); err != nil {
+	if err = e.WriteHead(FLOAT4, tag); err != nil {
 		return err
 	}
 
@@ -215,7 +215,7 @@ func (e *Encoder) WriteFloat64(data float64, tag byte) (err error) {
 	// }
 
 	// [step 2] 否则写 type、tag
-	if err = e.WriteHead(DOUBLE, tag); err != nil {
+	if err = e.WriteHead(FLOAT8, tag); err != nil {
 		return
 	}
 
@@ -294,8 +294,8 @@ func (e *Encoder) WriteSliceUint8(data []uint8, tag byte) (err error) {
 	}
 
 	// [step 3] 写 list 里的类型
-	if err = e.writeByte(uint8(BYTE)); err != nil {
-		return fmt.Errorf("write list item data type failed, type:%s, tag:%d ,err: %s", BYTE, tag, err)
+	if err = e.writeByte(uint8(INT1)); err != nil {
+		return fmt.Errorf("write list item data type failed, type:%s, tag:%d ,err: %s", INT1, tag, err)
 	}
 
 	// [step 4] 写数据

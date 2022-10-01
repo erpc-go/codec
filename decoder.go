@@ -82,7 +82,7 @@ func (d *Decoder) ReadInt8(data *int8, tag byte, require bool) (err error) {
 	case ZeroTag: // 类型是 0
 		*data = 0
 		return nil
-	case BYTE: // 类型是普通的数据，则读取一个字节
+	case INT1: // 类型是普通的数据，则读取一个字节
 		var tmp uint8
 		tmp, err = d.readByte()
 		if err != nil {
@@ -112,7 +112,7 @@ func (d *Decoder) ReadInt16(data *int16, tag byte, require bool) (err error) {
 	case ZeroTag: // 数据是 0
 		*data = 0
 		return
-	case BYTE: // 类型是一个字节
+	case INT1: // 类型是一个字节
 		var tmp uint8
 		tmp, err = d.readByte()
 		if err != nil {
@@ -120,7 +120,7 @@ func (d *Decoder) ReadInt16(data *int16, tag byte, require bool) (err error) {
 		}
 		*data = int16(int8(tmp))
 		return
-	case SHORT: // 类型是两个字节
+	case INT2: // 类型是两个字节
 		var tmp uint16
 		tmp, err = d.readByte2()
 		if err != nil {
@@ -150,7 +150,7 @@ func (d *Decoder) ReadInt32(data *int32, tag byte, require bool) (err error) {
 	case ZeroTag: // 0
 		*data = 0
 		return
-	case BYTE: // 1byte
+	case INT1: // 1byte
 		var tmp uint8
 		tmp, err = d.readByte()
 		if err != nil {
@@ -158,7 +158,7 @@ func (d *Decoder) ReadInt32(data *int32, tag byte, require bool) (err error) {
 		}
 		*data = int32(int8(tmp))
 		return
-	case SHORT: // 2byte
+	case INT2: // 2byte
 		var tmp uint16
 		tmp, err = d.readByte2()
 		if err != nil {
@@ -166,7 +166,7 @@ func (d *Decoder) ReadInt32(data *int32, tag byte, require bool) (err error) {
 		}
 		*data = int32(int16(tmp))
 		return
-	case INT: // 4 byte
+	case INT4: // 4 byte
 		var tmp uint32
 		tmp, err = d.readByte4()
 		if err != nil {
@@ -196,7 +196,7 @@ func (d *Decoder) ReadInt64(data *int64, tag byte, require bool) (err error) {
 	case ZeroTag: // 0
 		*data = 0
 		return
-	case BYTE: // 1B
+	case INT1: // 1B
 		var tmp uint8
 		tmp, err = d.readByte()
 		if err != nil {
@@ -204,7 +204,7 @@ func (d *Decoder) ReadInt64(data *int64, tag byte, require bool) (err error) {
 		}
 		*data = int64(int8(tmp))
 		return
-	case SHORT: // 2B
+	case INT2: // 2B
 		var tmp uint16
 		tmp, err = d.readByte2()
 		if err != nil {
@@ -212,7 +212,7 @@ func (d *Decoder) ReadInt64(data *int64, tag byte, require bool) (err error) {
 		}
 		*data = int64(int16(tmp))
 		return
-	case INT: // 4B
+	case INT4: // 4B
 		var tmp uint32
 		tmp, err = d.readByte4()
 		if err != nil {
@@ -220,7 +220,7 @@ func (d *Decoder) ReadInt64(data *int64, tag byte, require bool) (err error) {
 		}
 		*data = int64(int32(tmp))
 		return
-	case LONG: // 8B
+	case INT8: // 8B
 		var tmp uint64
 		tmp, err = d.readByte8()
 		if err != nil {
@@ -290,7 +290,7 @@ func (d *Decoder) ReadFloat32(data *float32, tag byte, require bool) (err error)
 	case ZeroTag: // 0
 		*data = 0
 		return
-	case FLOAT: // 4B
+	case FLOAT4: // 4B
 		var tmp uint32
 		tmp, err = d.readByte4()
 		if err != nil {
@@ -332,7 +332,7 @@ func (d *Decoder) ReadFloat64(data *float64, tag byte, require bool) (err error)
 	// 	}
 	// 	*data = float64(math.Float32frombits(tmp))
 	// 	return
-	case DOUBLE: // 8B
+	case FLOAT8: // 8B
 		var tmp uint64
 		tmp, err = d.readByte8()
 		if err != nil {
@@ -444,7 +444,7 @@ func (d *Decoder) ReadSliceUint8(data *[]uint8, tag byte, require bool) (err err
 		return fmt.Errorf("read item type failed, tag:%d, err:%s", tag, err)
 	}
 
-	if JceEncodeType(itemType) != BYTE {
+	if JceEncodeType(itemType) != INT1 {
 		return fmt.Errorf("need BYTE byte when read []uint8, tag:%d", tag)
 	}
 
@@ -596,17 +596,17 @@ func (d *Decoder) Reader() (reader *bufio.Reader) {
 // j// go:nosplit
 func (d *Decoder) skipField(ty JceEncodeType) (err error) {
 	switch ty {
-	case BYTE:
+	case INT1:
 		return d.skip(1)
-	case SHORT:
+	case INT2:
 		return d.skip(2)
-	case INT:
+	case INT4:
 		return d.skip(4)
-	case LONG:
+	case INT8:
 		return d.skip(8)
-	case FLOAT:
+	case FLOAT4:
 		return d.skip(4)
-	case DOUBLE:
+	case FLOAT8:
 		return d.skip(8)
 	case STRING1:
 		return d.skipFieldString1()
@@ -729,7 +729,7 @@ func (d *Decoder) skipFieldSimpleList() error {
 		return err
 	}
 
-	if JceEncodeType(t) != BYTE {
+	if JceEncodeType(t) != INT1 {
 		return fmt.Errorf("simple list need byte head. but get %d", t)
 	}
 

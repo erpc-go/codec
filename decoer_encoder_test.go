@@ -14,7 +14,7 @@ func TestHead(t *testing.T) {
 	data := bytes.NewBuffer(make([]byte, 0))
 
 	b := NewEncoder(data)
-	if err := b.WriteHead(BYTE, 245); err != nil {
+	if err := b.WriteHead(INT1, 245); err != nil {
 		t.Error(err)
 	}
 	if err := b.Flush(); err != nil {
@@ -26,7 +26,7 @@ func TestHead(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if ty != BYTE && tag != 245 {
+	if ty != INT1 && tag != 245 {
 		t.Error(err)
 	}
 }
