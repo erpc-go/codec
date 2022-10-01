@@ -475,6 +475,37 @@ func (d *Decoder) ReadByte() (b byte, err error) {
 	return d.readByte()
 }
 
+// return reader
+func (d *Decoder) Reader() (reader *bufio.Reader) {
+	return d.buf
+}
+
+// read struct begin type
+func (d *Decoder) ReadStructBegin() (err error) {
+	data, err := d.readByte()
+	if err != nil {
+		return
+	}
+	if data != uint8(StructBegin) {
+		return fmt.Errorf("got type %s, but want %s", JceEncodeType(data), StructBegin)
+	}
+
+	return
+}
+
+// read struct end type
+func (d *Decoder) ReadStructEnd() (err error) {
+	data, err := d.readByte()
+	if err != nil {
+		return
+	}
+	if data != uint8(StructEnd) {
+		return fmt.Errorf("got type %s, but want %s", JceEncodeType(data), StructEnd)
+	}
+
+	return
+}
+
 // ---------------------------------------------------------------------------
 // 内部函数
 
@@ -584,11 +615,6 @@ func (d *Decoder) unreadHead(curTag byte) {
 	if curTag >= 15 {
 		_ = d.buf.UnreadByte()
 	}
-}
-
-// return reader
-func (d *Decoder) Reader() (reader *bufio.Reader) {
-	return d.buf
 }
 
 // 跳过 type 类型个字节, 不包括 head 部分

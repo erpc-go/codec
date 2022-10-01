@@ -260,8 +260,9 @@ float64 的值范围在 float32 内时，不能优化为 float32 来存储，因
 * [x] 序列化测试
 * [x] 性能优化
 * [x] 压力测试
+* [x] struct 内部时 struct 时的实现
+x [x] struct 写 begin、end 字段
 * [ ] 长度字段的实现
-* [ ] struct 内部时 struct 时的实现
 
 
 # 参考

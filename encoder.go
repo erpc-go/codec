@@ -324,6 +324,16 @@ func (e *Encoder) Writer() (writer *bufio.Writer) {
 	return e.buf
 }
 
+// write struct begin type
+func (e *Encoder) WriteStructBegin() (err error) {
+	return e.writeByte(uint8(StructBegin))
+}
+
+// write struct end type
+func (e *Encoder) WriteStructEnd() (err error) {
+	return e.writeByte(uint8(StructEnd))
+}
+
 // ---------------------------------------------------------------------------------
 // 内部函数
 
