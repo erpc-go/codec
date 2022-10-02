@@ -15,43 +15,52 @@ var (
 // jce 基础编码类型表，用来编码使用，和语言无关
 type JceEncodeType byte
 
-func (j JceEncodeType) String() string {
-	if int(j) < len(typeToStr) {
-		return typeToStr[j]
-	}
-	return "invalidType"
-}
-
 // jce type
 const (
-	INT1 JceEncodeType = iota
-	INT2
-	INT4
-	INT8
-	FLOAT4
-	FLOAT8
-	ZeroTag
+	Int1 JceEncodeType = iota
+	Int2
+	Int4
+	Int8
+	Float4
+	Float8
+	Zero
 	String
-	MAP
+	Map
 	SimpleList
-	LIST
+	List
 	StructBegin
 	StructEnd
 )
 
-var typeToStr = []string{
-	"Int1",
-	"Int2",
-	"Int4",
-	"Int8",
-	"Float4",
-	"Float8",
-	"ZeroTag",
-	"String1",
-	"String4",
-	"Map",
-	"SimpleList",
-	"List",
-	"StructBegin",
-	"StructEnd",
+func (j JceEncodeType) String() string {
+	switch j {
+	case Int1:
+		return "Int1"
+	case Int2:
+		return "Int2"
+	case Int4:
+		return "Int4"
+	case Int8:
+		return "Int8"
+	case Float4:
+		return "Float4"
+	case Float8:
+		return "Float8"
+	case Zero:
+		return "Zero"
+	case String:
+		return "String"
+	case Map:
+		return "Map"
+	case SimpleList:
+		return "SimpleList"
+	case List:
+		return "List"
+	case StructBegin:
+		return "StructBegin"
+	case StructEnd:
+		return "StructEnd"
+	default:
+		return "invalidType"
+	}
 }

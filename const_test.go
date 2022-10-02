@@ -5,7 +5,7 @@ package jce
 
 import "testing"
 
-func TestJceEncodeType_String(t *testing.T) {
+func TestJceEncodeType(t *testing.T) {
 	tests := []struct {
 		name string
 		j    JceEncodeType
@@ -13,8 +13,8 @@ func TestJceEncodeType_String(t *testing.T) {
 	}{
 		{
 			name: "",
-			j:    INT1,
-			want: "Byte",
+			j:    Int1,
+			want: "Int1",
 		},
 		{
 			name: "",

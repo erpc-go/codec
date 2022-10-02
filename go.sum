@@ -1,6 +1,2 @@
-github.com/erpc-go/jce2go v0.0.0-20221001060747-2e0636351668 h1:635CnQr6HrQQM2zmmXRuw7KrWA4zMW44/sK5kgEeC8g=
-github.com/erpc-go/jce2go v0.0.0-20221001060747-2e0636351668/go.mod h1:45l+YMRF3qMIfaSwq+fzBYA+At0Ehmfua9cBS9oNxyU=
-github.com/erpc-go/testjce2go v0.0.0-20221001062359-4de3edc6b801 h1:XfJB1ioxYaf0Sy0isYKrn+OvrMJA9fdy93lhENZXlpE=
-github.com/erpc-go/testjce2go v0.0.0-20221001062359-4de3edc6b801/go.mod h1:GasDA5pdvdRCuLxAFCqEF3m4Bj1ACCQGKzOUSZ1tfIY=
 github.com/smartystreets/assertions v1.13.0 h1:Dx1kYM01xsSqKPno3aqLnrwac2LetPvN23diwyr69Qs=
 github.com/smartystreets/assertions v1.13.0/go.mod h1:wDmR7qL282YbGsPy6H/yAsesrxfxaaSlJazyFLYVFx8=
